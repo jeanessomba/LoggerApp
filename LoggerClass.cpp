@@ -2,15 +2,17 @@
 #include <QTime>
 #include <QDate>
 #include <QCoreApplication>
+#include <QLoggingCategory>
 
+using namespace Logging;
 
-bool LoggerClass::_isInit = false;
-QSharedPointer<QFile> LoggerClass::_logFile = Q_NULLPTR;
-bool LoggerClass::_logToFile = false;
-QMutex LoggerClass::_mutex;
-uint LoggerClass::_logFileSize = 1024 * 2;
+bool LoggerConfig::_isInit = false;
+QSharedPointer<QFile> LoggerConfig::_logFile = Q_NULLPTR;
+bool LoggerConfig::_logToFile = false;
+QMutex LoggerConfig::_mutex;
+uint LoggerConfig::_logFileSize = 1024 * 2;
 
-bool LoggerClass::logFilesManager(const QString &type, const QMessageLogContext &context, const QString &msg)
+bool LoggerConfig::logFilesManager(const QString &type, const QMessageLogContext &context, const QString &msg)
 {
     bool result{false};
     QString appCurrentPath{QDir::currentPath()};
@@ -28,7 +30,7 @@ bool LoggerClass::logFilesManager(const QString &type, const QMessageLogContext 
     return writeLogFiles(absoluteFilePath, type, context, msg);
 }
 
-bool LoggerClass::writeLogFiles(const QString &name, const QString &type, const QMessageLogContext &context, const QString &msg)
+bool LoggerConfig::writeLogFiles(const QString &name, const QString &type, const QMessageLogContext &context, const QString &msg)
 {
     bool result{false};
     QString time = QTime::currentTime().toString("hh:mm:ss");
@@ -48,7 +50,7 @@ bool LoggerClass::writeLogFiles(const QString &name, const QString &type, const 
     return result;
 }
 
-void LoggerClass::clearLogFiles(const QString &name)
+void LoggerConfig::clearLogFiles(const QString &name)
 {
     QString logFileName = "/logFile.txt" ;
 
@@ -64,7 +66,7 @@ void LoggerClass::clearLogFiles(const QString &name)
     _logFile->close();
 }
 
-void LoggerClass::init(bool logToFile, uint logFileSize)
+void LoggerConfig::init(bool logToFile, uint logFileSize)
 {
     if(_isInit)
         return;
@@ -74,11 +76,22 @@ void LoggerClass::init(bool logToFile, uint logFileSize)
     if(_logToFile)
         qInfo() << QStringLiteral("For logfile, see: %1").arg(QCoreApplication::applicationDirPath()+"/LogFiles...");
 
-    qInstallMessageHandler(LoggerClass::myMessageOutput);
+    qInstallMessageHandler(LoggerConfig::myMessageOutput);
     _isInit = true;
 }
 
-void LoggerClass::myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+void LoggerConfig::setFilterRules(const QString &filter)
+{
+#ifdef QT_DEBUG
+     // For no logging, set the type to false. e.g "project.testClass.debug=false\n"
+    QLoggingCategory::setFilterRules(filter);
+#else
+  QLoggingCategory::setFilterRules("*.debug=false\n"
+                                   "");
+#endif
+}
+
+void LoggerConfig::myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     QMutexLocker locker(&_mutex);
 

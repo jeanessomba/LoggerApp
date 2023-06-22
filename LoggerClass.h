@@ -7,12 +7,14 @@
 #include <stdio.h>
 #include <QMutex>
 #include <QDir>
+#include "loggerapp-exports.h"
 
+namespace Logging {
 
-class LoggerClass
+class LOGGERAPP_API LoggerConfig
 {
 private:
-    LoggerClass() {}
+    LoggerConfig() {}
 
     static bool _isInit;
     static QSharedPointer<QFile> _logFile;
@@ -34,5 +36,8 @@ public:
     /// \param logFileSize is the maximal size of the log file
     ///
     static void init(bool logToFile = false, uint logFileSize = 1024 * 2);
+    static void setFilterRules(const QString &filter);
 
 };
+
+}

@@ -12,14 +12,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
 
-add_executable(LoggerApp
-  main.cpp
+add_library(LoggerApp SHARED
   LoggerClass.h
   LoggerClass.cpp
-  TestClass.cpp
-  TestClass.h
+  loggerapp-exports.h
 )
 target_link_libraries(LoggerApp Qt${QT_VERSION_MAJOR}::Core)
 
+target_compile_definitions(LoggerApp
+    PUBLIC $<$<OR:$<CONFIG:Debug>,$<CONFIG:Release>>:LOGGERAPP_API_LIBRARY>
+)
 install(TARGETS LoggerApp
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
