@@ -1,4 +1,4 @@
-#include "LoggerClass.h"
+#include "LoggerConfig.h"
 #include <QTime>
 #include <QDate>
 #include <QCoreApplication>
